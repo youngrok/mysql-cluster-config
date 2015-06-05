@@ -1,0 +1,26 @@
+[ndbd default]
+NoOfReplicas=2
+DataMemory=80M
+IndexMemory=18M
+
+{% for host in mgm_nodes %}
+[ndb_mgmd]
+hostname={{ host[1] }}
+datadir=/var/lib/mysql-cluster
+
+{% endfor %}
+
+
+{% for host in data_nodes %}
+[ndbd]
+hostname={{ host[1] }}
+datadir=/var/lib/mysql-cluster/data
+
+{% endfor %}
+
+
+{% for host in sql_nodes %}
+[mysqld]
+hostname={{ host[1] }}
+
+{% endfor %}

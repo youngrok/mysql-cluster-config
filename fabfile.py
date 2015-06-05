@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from time import sleep
-from fabric.context_managers import lcd, cd
+from fabric.context_managers import lcd, cd, settings
 from fabric.contrib.files import upload_template, exists
 from fabric.decorators import roles, parallel
 from fabric.operations import put, run, sudo
@@ -159,3 +159,15 @@ def newrelic(newrelic_license_key):
     require.deb.packages(['newrelic-sysmond'])
     sudo('nrsysmond-config --set license_key=' + newrelic_license_key)
     require.service.started('newrelic-sysmond')
+
+
+@roles('mgm_nodes', 'sql_nodes', 'data_nodes')
+def whatap(whatap_license_key):
+    with settings(warn_only=True):
+        if run('type whatap').return_code:
+            sudo('wget http://repo.whatap.io/debian/release.gpg -O -|apt-key add -')
+            sudo('wget http://repo.whatap.io/debian/whatap-repo_1.0_all.deb')
+            sudo('dpkg -i whatap-repo_1.0_all.deb')
+            sudo('apt-get update')
+            require.deb.packages(['whatap-agent'])
+            sudo('whatap ' + whatap_license_key)

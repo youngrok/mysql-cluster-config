@@ -33,6 +33,10 @@ create servers.py in project root folder:
 
     fab newrelic:LICENSE_KEY
     
+## setup whatap
+
+    fab whatap:LICENSE_KEY
+    
 ## Connect
 connect on sql node server.
 

@@ -3,10 +3,10 @@ from time import sleep
 from fabric.context_managers import lcd, cd
 from fabric.contrib.files import upload_template, exists
 from fabric.decorators import roles, parallel
-from fabric.operations import put, run
+from fabric.operations import put, run, sudo
 from fabric.state import env
 from fabric.tasks import execute
-from fabtools import require
+from fabtools import require, fabtools
 import itertools
 
 import servers
@@ -147,3 +147,15 @@ def start_mysql_cluster():
     execute(start_mgm_nodes)
     execute(start_data_nodes)
     execute(start_sql_nodes)
+
+
+@roles('mgm_nodes', 'sql_nodes', 'data_nodes')
+def newrelic(newrelic_license_key):
+    if not fabtools.files.exists('/etc/apt/sources.list.d/newrelic.list'):
+        sudo('echo deb http://apt.newrelic.com/debian/ newrelic non-free >> /etc/apt/sources.list.d/newrelic.list')
+        sudo('wget -O- https://download.newrelic.com/548C16BF.gpg | apt-key add -')
+        sudo('apt-get update')
+
+    require.deb.packages(['newrelic-sysmond'])
+    sudo('nrsysmond-config --set license_key=' + newrelic_license_key)
+    require.service.started('newrelic-sysmond')
